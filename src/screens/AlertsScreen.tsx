@@ -14,12 +14,15 @@ import { RootStackParamList } from '@/navigation/types';
 import { useAppStore } from '@/store/useAppStore';
 import { stationById } from '@/data/stations';
 import { ALERT_LABELS, AlertLevel } from '@/types';
-import { colors, levelBg, levelColors, radius, spacing } from '@/theme';
+import { radius, spacing, ThemeColors } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 import { startAlarm, stopAlarm } from '@/services/alarm';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Alerts'>;
 
 export function AlertsScreen({ navigation }: Props) {
+  const { colors, levelBg, levelColors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const alerts = useAppStore((s) => s.alerts);
   const acknowledgeAlert = useAppStore((s) => s.acknowledgeAlert);
   const { width, height } = useWindowDimensions();
@@ -148,62 +151,63 @@ export function AlertsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
-  banner: {
-    margin: spacing.lg,
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: 2,
-  },
-  fullscreenBanner: {
-    marginHorizontal: spacing.lg,
-    paddingVertical: spacing.xxl,
-  },
-  bannerLevel: { fontSize: 28, fontWeight: '900', letterSpacing: 1 },
-  bannerMsg: { color: colors.text, fontSize: 16, marginTop: 8, lineHeight: 22 },
-  bannerTime: { color: colors.textDim, fontSize: 12, marginTop: 8 },
-  bannerActions: {
-    flexDirection: 'row',
-    marginTop: spacing.lg,
-    gap: spacing.md as any,
-  },
-  btn: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.sm,
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  btnText: { color: colors.text, fontWeight: '700' },
-  calm: {
-    alignItems: 'center',
-    padding: spacing.xxl,
-    margin: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  calmDot: { width: 14, height: 14, borderRadius: 7, marginBottom: spacing.sm },
-  calmTitle: { color: colors.text, fontSize: 16, fontWeight: '700' },
-  calmSub: { color: colors.textDim, fontSize: 12, marginTop: 4, textAlign: 'center' },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-    paddingHorizontal: spacing.lg,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderLeftWidth: 4,
-    padding: spacing.md,
-  },
-  rowTitle: { color: colors.text, fontSize: 14, fontWeight: '700' },
-  rowMsg: { color: colors.textDim, fontSize: 12, marginTop: 2 },
-  rowTime: { color: colors.textSub, fontSize: 11, marginTop: 4 },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: colors.bg },
+    banner: {
+      margin: spacing.lg,
+      padding: spacing.lg,
+      borderRadius: radius.lg,
+      borderWidth: 2,
+    },
+    fullscreenBanner: {
+      marginHorizontal: spacing.lg,
+      paddingVertical: spacing.xxl,
+    },
+    bannerLevel: { fontSize: 28, fontWeight: '900', letterSpacing: 1 },
+    bannerMsg: { color: colors.text, fontSize: 16, marginTop: 8, lineHeight: 22 },
+    bannerTime: { color: colors.textDim, fontSize: 12, marginTop: 8 },
+    bannerActions: {
+      flexDirection: 'row',
+      marginTop: spacing.lg,
+      gap: spacing.md as any,
+    },
+    btn: {
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: radius.sm,
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    btnText: { color: colors.text, fontWeight: '700' },
+    calm: {
+      alignItems: 'center',
+      padding: spacing.xxl,
+      margin: spacing.lg,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+    },
+    calmDot: { width: 14, height: 14, borderRadius: 7, marginBottom: spacing.sm },
+    calmTitle: { color: colors.text, fontSize: 16, fontWeight: '700' },
+    calmSub: { color: colors.textDim, fontSize: 12, marginTop: 4, textAlign: 'center' },
+    sectionTitle: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: '700',
+      paddingHorizontal: spacing.lg,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.card,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderLeftWidth: 4,
+      padding: spacing.md,
+    },
+    rowTitle: { color: colors.text, fontSize: 14, fontWeight: '700' },
+    rowMsg: { color: colors.textDim, fontSize: 12, marginTop: 2 },
+    rowTime: { color: colors.textSub, fontSize: 11, marginTop: 4 },
+  });
