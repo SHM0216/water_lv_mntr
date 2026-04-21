@@ -94,7 +94,7 @@ export function AlertsScreen({ navigation }: Props) {
               }}
               style={[styles.btn, { backgroundColor: levelColors[activeLevel] }]}
             >
-              <Text style={[styles.btnText, { color: '#0A1628' }]}>확인</Text>
+              <Text style={[styles.btnText, { color: '#FFFFFF' }]}>확인</Text>
             </Pressable>
           </View>
         </View>

@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
 import { useAppStore } from '@/store/useAppStore';
 import { stationById } from '@/data/stations';
-import { colors, levelColors, radius, spacing } from '@/theme';
+import { colors, levelColors, radius, seriesColors, spacing } from '@/theme';
 import { StatusBadge } from '@/components/StatusBadge';
 import { LevelChart } from '@/components/LevelChart';
 import { ConnectionBanner } from '@/components/ConnectionBanner';
@@ -50,7 +50,7 @@ export function DetailScreen({ route, navigation }: Props) {
 
       <View style={styles.metricsRow}>
         <Metric label="내수위" value={reading ? `${reading.innerLevelM.toFixed(2)} m` : '--'} color={levelColors[reading?.level ?? 0]} />
-        <Metric label="외수위" value={reading ? `${reading.outerLevelM.toFixed(2)} m` : '--'} color="#4F8BFF" />
+        <Metric label="외수위" value={reading ? `${reading.outerLevelM.toFixed(2)} m` : '--'} color={seriesColors.outer} />
         <Metric
           label="가동 펌프"
           value={reading ? `${reading.pumpsRunning} / ${reading.pumpsTotal}` : '--'}
