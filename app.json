@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "빗물펌프장 수위 모니터",
+    "slug": "water-lv-mntr",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "waterlvmntr",
+    "newArchEnabled": false,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "kr.go.seoul.waterlvmntr",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification", "audio"]
+      }
+    },
+    "android": {
+      "package": "kr.go.seoul.waterlvmntr",
+      "permissions": [
+        "VIBRATE",
+        "WAKE_LOCK",
+        "RECEIVE_BOOT_COMPLETED",
+        "POST_NOTIFICATIONS",
+        "FOREGROUND_SERVICE"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#0B3D91"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#0B3D91"
+        }
+      ]
+    ],
+    "extra": {
+      "apiBaseUrl": "https://api.example.kr",
+      "wsBaseUrl": "wss://api.example.kr/ws"
+    }
+  }
+}
