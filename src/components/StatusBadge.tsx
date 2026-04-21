@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { AlertLevel, ALERT_LABELS } from '@/types';
-import { colors, levelBg, levelColors, radius, spacing } from '@/theme';
+import { radius, spacing } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 
 type Props = {
   level: AlertLevel;
@@ -10,6 +11,8 @@ type Props = {
 };
 
 export function StatusBadge({ level, online = true, compact = false }: Props) {
+  const { colors, levelBg, levelColors } = useTheme();
+  const styles = useMemo(() => makeStyles(), []);
   const label = online ? ALERT_LABELS[level] : '오프라인';
   const bg = online ? levelBg[level] : 'rgba(156,163,175,0.18)';
   const fg = online ? levelColors[level] : colors.offline;
@@ -27,31 +30,32 @@ export function StatusBadge({ level, online = true, compact = false }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    alignSelf: 'flex-start',
-  },
-  compact: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  label: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  labelCompact: {
-    fontSize: 11,
-  },
-});
+const makeStyles = () =>
+  StyleSheet.create({
+    wrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs,
+      borderRadius: radius.sm,
+      borderWidth: 1,
+      alignSelf: 'flex-start',
+    },
+    compact: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+    },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      marginRight: 6,
+    },
+    label: {
+      fontSize: 13,
+      fontWeight: '700',
+    },
+    labelCompact: {
+      fontSize: 11,
+    },
+  });

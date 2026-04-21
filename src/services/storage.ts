@@ -8,6 +8,7 @@ const KEYS = {
   pushToken: 'wlm:pushToken',
   batteryGuideAck: 'wlm:batteryGuideAck',
   acks: 'wlm:acknowledgedIds',
+  themeMode: 'wlm:themeMode',
 };
 
 export async function cacheReadings(readings: LevelReading[]): Promise<void> {
@@ -51,4 +52,12 @@ export async function setBatteryGuideAck(ack: boolean): Promise<void> {
 
 export async function getBatteryGuideAck(): Promise<boolean> {
   return (await AsyncStorage.getItem(KEYS.batteryGuideAck)) === '1';
+}
+
+export async function saveThemeMode(mode: string): Promise<void> {
+  await AsyncStorage.setItem(KEYS.themeMode, mode);
+}
+
+export async function loadThemeMode(): Promise<string | null> {
+  return AsyncStorage.getItem(KEYS.themeMode);
 }

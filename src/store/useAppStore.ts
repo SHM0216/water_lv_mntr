@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { AlertEvent, AlertLevel, DutyAssignment, LevelReading } from '@/types';
 import { STATIONS } from '@/data/stations';
 import { simulateAll } from '@/services/simulator';
+import { ThemeMode } from '@/theme';
 import {
   cacheReadings,
   loadCachedReadings,
@@ -13,6 +14,8 @@ import {
   savePushToken,
   getBatteryGuideAck,
   setBatteryGuideAck,
+  loadThemeMode,
+  saveThemeMode,
 } from '@/services/storage';
 
 type State = {
@@ -25,6 +28,7 @@ type State = {
   pushToken: string | null;
   batteryGuideAck: boolean;
   currentUser: string;
+  themeMode: ThemeMode;
 };
 
 type Actions = {
@@ -37,6 +41,7 @@ type Actions = {
   setPushToken: (t: string | null) => Promise<void>;
   setBatteryAck: (v: boolean) => Promise<void>;
   setCurrentUser: (name: string) => void;
+  setThemeMode: (m: ThemeMode) => Promise<void>;
 };
 
 const INITIAL_DUTY: DutyAssignment[] = [
@@ -47,7 +52,7 @@ const INITIAL_DUTY: DutyAssignment[] = [
     primary: '김주임',
     backup: '박대리',
     phone: '010-0000-0000',
-    note: '야간 집중 호우 예보 - 강남·서초 중점 모니터링',
+    note: '야간 집중 호우 예보 - 신천·금호강 유역 중점 모니터링',
   },
 ];
 
@@ -92,18 +97,21 @@ export const useAppStore = create<State & Actions>((set, get) => ({
   pushToken: null,
   batteryGuideAck: false,
   currentUser: '당직자',
+  themeMode: 'system',
 
   hydrate: async () => {
-    const [cached, alerts, duty, pushToken, ack] = await Promise.all([
+    const [cached, alerts, duty, pushToken, ack, mode] = await Promise.all([
       loadCachedReadings(),
       loadAlerts(),
       loadDuty(),
       loadPushToken(),
       getBatteryGuideAck(),
+      loadThemeMode(),
     ]);
     const live = simulateAll(Date.now());
     const dict: Record<string, LevelReading> = {};
     for (const r of live) dict[r.stationId] = r;
+    const validMode: ThemeMode = mode === 'light' || mode === 'dark' || mode === 'system' ? mode : 'system';
     set({
       readings: dict,
       alerts: alerts.length ? alerts : buildAlertsFromReadings([], live),
@@ -111,6 +119,7 @@ export const useAppStore = create<State & Actions>((set, get) => ({
       cacheAt: cached?.at ?? Date.now(),
       pushToken,
       batteryGuideAck: ack,
+      themeMode: validMode,
     });
     await cacheReadings(live);
     if (!duty.length) await saveDuty(INITIAL_DUTY);
@@ -178,4 +187,9 @@ export const useAppStore = create<State & Actions>((set, get) => ({
   },
 
   setCurrentUser: (name) => set({ currentUser: name }),
+
+  setThemeMode: async (m) => {
+    set({ themeMode: m });
+    await saveThemeMode(m);
+  },
 }));

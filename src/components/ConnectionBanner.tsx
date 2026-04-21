@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, ThemeColors } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 import { useAppStore } from '@/store/useAppStore';
 
 function formatAgo(ts: number | null): string {
@@ -14,10 +15,11 @@ function formatAgo(ts: number | null): string {
 }
 
 export function ConnectionBanner() {
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const online = useAppStore((s) => s.online);
   const cacheAt = useAppStore((s) => s.cacheAt);
   const currentTime = useAppStore((s) => s.currentTime);
-  // tick currentTime is used so the "ago" string re-renders
   void currentTime;
   if (online) return null;
   return (
@@ -30,25 +32,26 @@ export function ConnectionBanner() {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(156,163,175,0.18)',
-    borderColor: colors.offline,
-    borderWidth: 1,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.sm,
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.offline,
-    marginRight: spacing.sm,
-  },
-  text: { color: colors.text, fontSize: 13, flex: 1 },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    wrap: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: 'rgba(156,163,175,0.18)',
+      borderColor: colors.offline,
+      borderWidth: 1,
+      borderRadius: radius.sm,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      marginHorizontal: spacing.lg,
+      marginTop: spacing.sm,
+    },
+    dot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.offline,
+      marginRight: spacing.sm,
+    },
+    text: { color: colors.text, fontSize: 13, flex: 1 },
+  });
