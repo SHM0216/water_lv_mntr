@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
   },
-  primaryBtnText: { color: '#0A1628', fontWeight: '800' },
+  primaryBtnText: { color: '#FFFFFF', fontWeight: '800' },
   listTitle: {
     color: colors.text,
     fontSize: 14,

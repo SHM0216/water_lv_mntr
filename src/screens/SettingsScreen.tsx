@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
   },
-  primaryBtnText: { color: '#0A1628', fontWeight: '800' },
+  primaryBtnText: { color: '#FFFFFF', fontWeight: '800' },
   secondaryBtn: {
     borderWidth: 1,
     borderColor: colors.border,
