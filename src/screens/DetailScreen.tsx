@@ -4,7 +4,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
 import { useAppStore } from '@/store/useAppStore';
 import { stationById } from '@/data/stations';
-import { colors, levelColors, radius, seriesColors, spacing } from '@/theme';
+import { radius, spacing, ThemeColors } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 import { StatusBadge } from '@/components/StatusBadge';
 import { LevelChart } from '@/components/LevelChart';
 import { ConnectionBanner } from '@/components/ConnectionBanner';
@@ -13,6 +14,8 @@ import { simulate24hTrend } from '@/services/simulator';
 type Props = NativeStackScreenProps<RootStackParamList, 'Detail'>;
 
 export function DetailScreen({ route, navigation }: Props) {
+  const { colors, levelColors, seriesColors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const { stationId } = route.params;
   const station = stationById(stationId);
   const reading = useAppStore((s) => s.readings[stationId]);
@@ -49,9 +52,20 @@ export function DetailScreen({ route, navigation }: Props) {
       <ConnectionBanner />
 
       <View style={styles.metricsRow}>
-        <Metric label="내수위" value={reading ? `${reading.innerLevelM.toFixed(2)} m` : '--'} color={levelColors[reading?.level ?? 0]} />
-        <Metric label="외수위" value={reading ? `${reading.outerLevelM.toFixed(2)} m` : '--'} color={seriesColors.outer} />
         <Metric
+          styles={styles}
+          label="내수위"
+          value={reading ? `${reading.innerLevelM.toFixed(2)} m` : '--'}
+          color={levelColors[reading?.level ?? 0]}
+        />
+        <Metric
+          styles={styles}
+          label="외수위"
+          value={reading ? `${reading.outerLevelM.toFixed(2)} m` : '--'}
+          color={seriesColors.outer}
+        />
+        <Metric
+          styles={styles}
           label="가동 펌프"
           value={reading ? `${reading.pumpsRunning} / ${reading.pumpsTotal}` : '--'}
           color={colors.text}
@@ -65,15 +79,15 @@ export function DetailScreen({ route, navigation }: Props) {
 
       <Text style={styles.sectionTitle}>임계값</Text>
       <View style={styles.thresholdCard}>
-        <ThresholdRow title="내수위" t={station.innerThreshold} />
+        <ThresholdRow styles={styles} levelColors={levelColors} title="내수위" t={station.innerThreshold} />
         <View style={styles.divider} />
-        <ThresholdRow title="외수위" t={station.outerThreshold} />
+        <ThresholdRow styles={styles} levelColors={levelColors} title="외수위" t={station.outerThreshold} />
       </View>
     </ScrollView>
   );
 }
 
-function Metric({ label, value, color }: { label: string; value: string; color: string }) {
+function Metric({ styles, label, value, color }: { styles: any; label: string; value: string; color: string }) {
   return (
     <View style={styles.metric}>
       <Text style={styles.metricLabel}>{label}</Text>
@@ -82,7 +96,17 @@ function Metric({ label, value, color }: { label: string; value: string; color: 
   );
 }
 
-function ThresholdRow({ title, t }: { title: string; t: { l1: number; l2: number; l3: number; l4: number } }) {
+function ThresholdRow({
+  styles,
+  levelColors,
+  title,
+  t,
+}: {
+  styles: any;
+  levelColors: Record<number, string>;
+  title: string;
+  t: { l1: number; l2: number; l3: number; l4: number };
+}) {
   return (
     <View style={{ padding: spacing.md }}>
       <Text style={styles.thresholdTitle}>{title}</Text>
@@ -106,78 +130,79 @@ function ThresholdRow({ title, t }: { title: string; t: { l1: number; l2: number
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
-  notFound: { color: colors.text, padding: spacing.lg },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  backBtn: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: radius.sm,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  backText: { color: colors.text },
-  title: {
-    color: colors.text,
-    fontSize: 22,
-    fontWeight: '800',
-    paddingHorizontal: spacing.lg,
-    marginTop: spacing.md,
-  },
-  subtitle: {
-    color: colors.textDim,
-    fontSize: 13,
-    paddingHorizontal: spacing.lg,
-    marginTop: 2,
-  },
-  metricsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    marginTop: spacing.md,
-    gap: spacing.md as any,
-  },
-  metric: {
-    flex: 1,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-  },
-  metricLabel: { color: colors.textDim, fontSize: 12 },
-  metricValue: { fontSize: 22, fontWeight: '800', marginTop: 4 },
-  sectionTitle: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '700',
-    marginTop: spacing.xl,
-    marginBottom: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  thresholdCard: {
-    marginHorizontal: spacing.lg,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-  },
-  thresholdTitle: { color: colors.textDim, fontSize: 12, marginBottom: 8 },
-  thresholdRow: { flexDirection: 'row' },
-  thresholdCell: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  thresholdDot: { width: 10, height: 10, borderRadius: 5, marginBottom: 4 },
-  thresholdLabel: { color: colors.textDim, fontSize: 11 },
-  thresholdValue: { color: colors.text, fontSize: 14, fontWeight: '700', marginTop: 2 },
-  divider: { height: 1, backgroundColor: colors.border, marginHorizontal: spacing.md },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: colors.bg },
+    notFound: { color: colors.text, padding: spacing.lg },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.lg,
+    },
+    backBtn: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: 6,
+      borderRadius: radius.sm,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    backText: { color: colors.text },
+    title: {
+      color: colors.text,
+      fontSize: 22,
+      fontWeight: '800',
+      paddingHorizontal: spacing.lg,
+      marginTop: spacing.md,
+    },
+    subtitle: {
+      color: colors.textDim,
+      fontSize: 13,
+      paddingHorizontal: spacing.lg,
+      marginTop: 2,
+    },
+    metricsRow: {
+      flexDirection: 'row',
+      paddingHorizontal: spacing.lg,
+      marginTop: spacing.md,
+      gap: spacing.md as any,
+    },
+    metric: {
+      flex: 1,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      padding: spacing.md,
+    },
+    metricLabel: { color: colors.textDim, fontSize: 12 },
+    metricValue: { fontSize: 22, fontWeight: '800', marginTop: 4 },
+    sectionTitle: {
+      color: colors.text,
+      fontSize: 14,
+      fontWeight: '700',
+      marginTop: spacing.xl,
+      marginBottom: spacing.sm,
+      paddingHorizontal: spacing.lg,
+    },
+    thresholdCard: {
+      marginHorizontal: spacing.lg,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+    },
+    thresholdTitle: { color: colors.textDim, fontSize: 12, marginBottom: 8 },
+    thresholdRow: { flexDirection: 'row' },
+    thresholdCell: {
+      flex: 1,
+      alignItems: 'center',
+      paddingVertical: 4,
+    },
+    thresholdDot: { width: 10, height: 10, borderRadius: 5, marginBottom: 4 },
+    thresholdLabel: { color: colors.textDim, fontSize: 11 },
+    thresholdValue: { color: colors.text, fontSize: 14, fontWeight: '700', marginTop: 2 },
+    divider: { height: 1, backgroundColor: colors.border, marginHorizontal: spacing.md },
+  });

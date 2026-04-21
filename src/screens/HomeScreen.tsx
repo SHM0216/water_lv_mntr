@@ -4,7 +4,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
 import { useAppStore } from '@/store/useAppStore';
 import { STATIONS } from '@/data/stations';
-import { colors, levelColors, radius, spacing } from '@/theme';
+import { radius, spacing, ThemeColors } from '@/theme';
+import { useTheme, useThemeMode } from '@/theme/useTheme';
 import { StationMap } from '@/components/StationMap';
 import { StationList } from '@/components/StationList';
 import { ConnectionBanner } from '@/components/ConnectionBanner';
@@ -12,6 +13,9 @@ import { ConnectionBanner } from '@/components/ConnectionBanner';
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
+  const { colors, levelColors } = useTheme();
+  const { resolved, setMode } = useThemeMode();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const readings = useAppStore((s) => s.readings);
   const alerts = useAppStore((s) => s.alerts);
   const [view, setView] = useState<'map' | 'list'>('map');
@@ -33,19 +37,26 @@ export function HomeScreen({ navigation }: Props) {
     <View style={styles.root}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>빗물펌프장 22개소</Text>
+          <Text style={styles.title}>대구광역시 빗물펌프장 22개소</Text>
           <Text style={styles.subtitle}>실시간 수위 모니터링 · 30초 주기 갱신</Text>
         </View>
-        <Pressable
-          style={[styles.alertPill, activeAlerts.length > 0 && styles.alertPillHot]}
-          onPress={() => navigation.navigate('Alerts')}
-          accessibilityLabel="경보 목록 열기"
-        >
-          <View style={[styles.dot, { backgroundColor: activeAlerts.length ? levelColors[4] : colors.online }]} />
-          <Text style={styles.alertPillText}>
-            경보 {activeAlerts.length}
-          </Text>
-        </Pressable>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm as any }}>
+          <Pressable
+            onPress={() => setMode(resolved === 'dark' ? 'light' : 'dark')}
+            style={styles.iconBtn}
+            accessibilityLabel="테마 전환"
+          >
+            <Text style={styles.iconBtnText}>{resolved === 'dark' ? '☀︎ 라이트' : '☾ 다크'}</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.alertPill, activeAlerts.length > 0 && styles.alertPillHot]}
+            onPress={() => navigation.navigate('Alerts')}
+            accessibilityLabel="경보 목록 열기"
+          >
+            <View style={[styles.dot, { backgroundColor: activeAlerts.length ? levelColors[4] : colors.online }]} />
+            <Text style={styles.alertPillText}>경보 {activeAlerts.length}</Text>
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.summaryRow}>
@@ -63,8 +74,8 @@ export function HomeScreen({ navigation }: Props) {
       <ConnectionBanner />
 
       <View style={styles.tabsRow}>
-        <TabButton label="지도" active={view === 'map'} onPress={() => setView('map')} />
-        <TabButton label="목록" active={view === 'list'} onPress={() => setView('list')} />
+        <TabButton label="지도" active={view === 'map'} onPress={() => setView('map')} colors={colors} />
+        <TabButton label="목록" active={view === 'list'} onPress={() => setView('list')} colors={colors} />
         <View style={{ flex: 1 }} />
         <Pressable onPress={() => navigation.navigate('Duty')} style={styles.linkBtn}>
           <Text style={styles.linkBtnText}>당직 인수인계</Text>
@@ -94,89 +105,116 @@ export function HomeScreen({ navigation }: Props) {
   );
 }
 
-function TabButton({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+function TabButton({
+  label,
+  active,
+  onPress,
+  colors,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  colors: ThemeColors;
+}) {
   return (
     <Pressable
       onPress={onPress}
-      style={[styles.tab, active && styles.tabActive]}
+      style={[
+        {
+          paddingHorizontal: spacing.md,
+          paddingVertical: 6,
+          borderRadius: radius.sm,
+          marginRight: spacing.sm,
+          backgroundColor: active ? colors.accentSoft : colors.card,
+          borderWidth: 1,
+          borderColor: active ? colors.accent : colors.border,
+          ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+        },
+      ]}
       accessibilityRole="tab"
     >
-      <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
+      <Text
+        style={{
+          color: active ? colors.text : colors.textDim,
+          fontSize: 13,
+          fontWeight: '600',
+        }}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  title: { color: colors.text, fontSize: 20, fontWeight: '800' },
-  subtitle: { color: colors.textDim, fontSize: 12, marginTop: 2 },
-  alertPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  alertPillHot: { borderColor: levelColors[4] },
-  alertPillText: { color: colors.text, fontWeight: '700' },
-  dot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
-  summaryRow: {
-    flexDirection: 'row',
-    marginTop: spacing.md,
-    marginHorizontal: spacing.lg,
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: spacing.sm,
-  },
-  summaryCell: { flex: 1, alignItems: 'center' },
-  summaryDot: { width: 10, height: 10, borderRadius: 5, marginBottom: 4 },
-  summaryCount: { color: colors.text, fontSize: 18, fontWeight: '800' },
-  summaryLabel: { color: colors.textDim, fontSize: 11 },
-  tabsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.md,
-    paddingHorizontal: spacing.lg,
-  },
-  tab: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: radius.sm,
-    marginRight: spacing.sm,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  tabActive: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
-  tabText: { color: colors.textDim, fontSize: 13, fontWeight: '600' },
-  tabTextActive: { color: colors.text },
-  linkBtn: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
-    marginLeft: spacing.xs,
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  linkBtnText: { color: colors.accent, fontSize: 13, fontWeight: '600' },
-  body: {
-    flex: 1,
-    marginTop: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-  },
-  bodyWide: { flexDirection: 'row', gap: spacing.lg as any },
-  panel: { flex: 1, minHeight: 300 },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: colors.bg },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.lg,
+    },
+    title: { color: colors.text, fontSize: 20, fontWeight: '800' },
+    subtitle: { color: colors.textDim, fontSize: 12, marginTop: 2 },
+    iconBtn: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: 6,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    iconBtnText: { color: colors.text, fontSize: 12, fontWeight: '600' },
+    alertPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.md,
+      paddingVertical: 6,
+      borderRadius: radius.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.card,
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    alertPillHot: { borderColor: colors.alertDeep },
+    alertPillText: { color: colors.text, fontWeight: '700' },
+    dot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
+    summaryRow: {
+      flexDirection: 'row',
+      marginTop: spacing.md,
+      marginHorizontal: spacing.lg,
+      backgroundColor: colors.card,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: spacing.sm,
+    },
+    summaryCell: { flex: 1, alignItems: 'center' },
+    summaryDot: { width: 10, height: 10, borderRadius: 5, marginBottom: 4 },
+    summaryCount: { color: colors.text, fontSize: 18, fontWeight: '800' },
+    summaryLabel: { color: colors.textDim, fontSize: 11 },
+    tabsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: spacing.md,
+      paddingHorizontal: spacing.lg,
+    },
+    linkBtn: {
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 6,
+      marginLeft: spacing.xs,
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    linkBtnText: { color: colors.accent, fontSize: 13, fontWeight: '600' },
+    body: {
+      flex: 1,
+      marginTop: spacing.md,
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.lg,
+    },
+    bodyWide: { flexDirection: 'row', gap: spacing.lg as any },
+    panel: { flex: 1, minHeight: 300 },
+  });
