@@ -19,7 +19,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const navTheme = {
   ...DefaultTheme,
-  dark: true,
+  dark: false,
   colors: {
     ...DefaultTheme.colors,
     background: colors.bg,
@@ -51,7 +51,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <View style={styles.root}>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <SafeAreaView style={styles.root} edges={['top', 'left', 'right']}>
           <NavigationContainer theme={navTheme}>
             <Stack.Navigator

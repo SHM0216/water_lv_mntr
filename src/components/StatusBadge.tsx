@@ -11,7 +11,7 @@ type Props = {
 
 export function StatusBadge({ level, online = true, compact = false }: Props) {
   const label = online ? ALERT_LABELS[level] : '오프라인';
-  const bg = online ? levelBg[level] : 'rgba(108,122,137,0.18)';
+  const bg = online ? levelBg[level] : 'rgba(156,163,175,0.18)';
   const fg = online ? levelColors[level] : colors.offline;
   return (
     <View

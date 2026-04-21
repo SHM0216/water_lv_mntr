@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   wrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(108,122,137,0.22)',
+    backgroundColor: 'rgba(156,163,175,0.18)',
     borderColor: colors.offline,
     borderWidth: 1,
     borderRadius: radius.sm,
