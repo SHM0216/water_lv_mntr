@@ -61,8 +61,8 @@ export function StationMap({ readings, onSelect }: Props) {
             y1={size.h * 0.42}
             x2={size.w}
             y2={size.h * 0.48}
-            stroke="#2B6CB0"
-            strokeOpacity={0.55}
+            stroke={colors.textDim}
+            strokeOpacity={0.35}
             strokeWidth={6}
           />
           {placed.map(({ station, x, y }) => {
@@ -146,15 +146,16 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 9,
     marginTop: 18,
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowRadius: 3,
+    textShadowColor: 'rgba(255,255,255,0.9)',
+    textShadowRadius: 2,
+    fontWeight: '600',
   },
   legend: {
     position: 'absolute',
     left: 12,
     bottom: 12,
     flexDirection: 'row',
-    backgroundColor: 'rgba(10,22,40,0.75)',
+    backgroundColor: 'rgba(255,255,255,0.92)',
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 8,

@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import Svg, { Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { LevelReading, PumpStation } from '@/types';
-import { colors, levelColors } from '@/theme';
+import { colors, levelColors, seriesColors } from '@/theme';
 
 type Props = {
   station: PumpStation;
@@ -131,13 +131,13 @@ export function LevelChart({ station, series }: Props) {
             </SvgText>
           ))}
           {thresholdLines}
-          <Path d={outerPath} stroke="#4F8BFF" strokeWidth={2} fill="none" />
-          <Path d={innerPath} stroke="#2ECC71" strokeWidth={2} fill="none" />
+          <Path d={outerPath} stroke={seriesColors.outer} strokeWidth={2} fill="none" />
+          <Path d={innerPath} stroke={seriesColors.inner} strokeWidth={2} fill="none" />
         </Svg>
       )}
       <View style={styles.legend} pointerEvents="none">
-        <LegendDot color="#2ECC71" label="내수위(m)" />
-        <LegendDot color="#4F8BFF" label="외수위(m)" />
+        <LegendDot color={seriesColors.inner} label="내수위(m)" />
+        <LegendDot color={seriesColors.outer} label="외수위(m)" />
       </View>
     </View>
   );
