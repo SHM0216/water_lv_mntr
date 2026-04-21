@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>빗물펌프장 모바일 앱 개발계획</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --text: #1A1A1A;
+    --text-2: #5F5E5A;
+    --text-3: #888780;
+    --border: #E5E3DC;
+    --border-2: #D3D1C7;
+    --accent: #0C447C;
+    --accent-bg: #E6F1FB;
+    --info-bg: #E6F1FB; --info-fg: #0C447C;
+    --warn-bg: #FAEEDA; --warn-fg: #854F0B;
+    --ok-bg: #EAF3DE; --ok-fg: #3B6D11;
+    --danger-bg: #FCEBEB; --danger-fg: #A32D2D;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss06";
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--border-2);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+  .meta {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  h1 {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 8px 0 6px;
+    line-height: 1.25;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--text-2);
+    margin-bottom: 24px;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border: 1px solid var(--border-2);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.primary:hover { background: #08305a; border-color: #08305a; color: #fff; }
+  .btn.ghost { background: transparent; color: var(--text-2); }
+
+  /* Sections */
+  section { margin-bottom: 56px; }
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-bottom: 20px;
+  }
+
+  /* Diagram */
+  .diagram-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    overflow-x: auto;
+  }
+  .diagram-wrap svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+  .caption {
+    font-size: 13px;
+    color: var(--text-2);
+    margin-top: 12px;
+    padding-left: 12px;
+    border-left: 2px solid var(--accent);
+    font-style: normal;
+  }
+
+  /* Checklist header */
+  .list-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .total-status {
+    font-size: 13px;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .total-status strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  /* Phase cards */
+  .phases { display: flex; flex-direction: column; gap: 14px; }
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    transition: border-color 0.15s;
+  }
+  .phase:hover { border-color: var(--border-2); }
+  .phase.complete {
+    background: #F7FAF5;
+    border-color: #C4D9A8;
+  }
+  .phase-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .phase-title-group { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .phase-title {
+    font-size: 15.5px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 4px;
+    letter-spacing: 0.01em;
+  }
+  .tag.info { background: var(--info-bg); color: var(--info-fg); }
+  .tag.warn { background: var(--warn-bg); color: var(--warn-fg); }
+  .tag.ok   { background: var(--ok-bg); color: var(--ok-fg); }
+  .phase-count {
+    font-size: 13px;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  /* Items */
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    cursor: pointer;
+    user-select: none;
+  }
+  .item input[type=checkbox] {
+    margin: 4px 0 0;
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .item:has(input:checked) .item-text {
+    text-decoration: line-through;
+    color: var(--text-3);
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 80px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-3);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    background: var(--border);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  /* Print */
+  @media print {
+    body { background: #fff; }
+    .wrap { max-width: none; padding: 0; }
+    .no-print { display: none !important; }
+    .phase { break-inside: avoid; border-color: #BBB; }
+    .diagram-wrap { border-color: #BBB; break-inside: avoid; }
+    header { border-bottom-color: #888; }
+    h1 { font-size: 22px; }
+    h2 { font-size: 16px; }
+    section { margin-bottom: 32px; }
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    .wrap { padding: 28px 16px 60px; }
+    h1 { font-size: 24px; }
+    .diagram-wrap { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="meta">Daegu · Smart Pumpstation Operations</div>
+    <h1>빗물펌프장 모바일 앱 개발계획</h1>
+    <div class="subtitle">SCADA 연동 · 30초 주기 실시간 수위 모니터링 · 4단계 경보 시스템</div>
+    <div class="actions no-print">
+      <button class="btn primary" onclick="window.print()">인쇄 · PDF 저장</button>
+      <button class="btn" onclick="exportJSON()">진행률 내보내기</button>
+      <button class="btn ghost" onclick="resetProgress()">초기화</button>
+    </div>
+  </header>
+
+  <section>
+    <h2>시스템 아키텍처</h2>
+    <div class="section-sub">폐쇄 OT망(SCADA)에서 DMZ, 백엔드, 모바일까지의 단방향 데이터 흐름</div>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 680 650" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="arch-title arch-desc">
+        <title id="arch-title">빗물펌프장 모바일 API 시스템 아키텍처</title>
+        <desc id="arch-desc">SCADA 폐쇄망에서 DMZ, 백엔드, 모바일 앱까지 이어지는 단방향 데이터 흐름 다이어그램</desc>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </marker>
+          <style>
+            .t-box { font: 500 14px 'Pretendard', sans-serif; fill: #042C53; }
+            .t-sub { font: 400 12px 'Pretendard', sans-serif; fill: #185FA5; }
+            .t-box-a { font: 500 14px 'Pretendard', sans-serif; fill: #633806; }
+            .t-sub-a { font: 400 12px 'Pretendard', sans-serif; fill: #854F0B; }
+            .t-box-t { font: 500 14px 'Pretendard', sans-serif; fill: #04342C; }
+            .t-sub-t { font: 400 12px 'Pretendard', sans-serif; fill: #0F6E56; }
+            .t-box-p { font: 500 14px 'Pretendard', sans-serif; fill: #26215C; }
+            .t-tag-b { font: 500 12px 'Pretendard', sans-serif; fill: #042C53; }
+            .t-tag-a { font: 500 12px 'Pretendard', sans-serif; fill: #633806; }
+            .t-tag-t { font: 500 12px 'Pretendard', sans-serif; fill: #04342C; }
+            .t-tag-p { font: 500 12px 'Pretendard', sans-serif; fill: #26215C; }
+            .t-arrow { font: 400 12px 'Pretendard', sans-serif; fill: #5F5E5A; }
+          </style>
+        </defs>
+
+        <!-- Zone 1: OT Network -->
+        <rect x="40" y="40" width="600" height="120" rx="14" fill="none" stroke="#B4B2A9" stroke-width="0.8" stroke-dasharray="6 4"/>
+        <rect x="56" y="52" width="120" height="22" rx="4" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text class="t-tag-b" x="116" y="66" text-anchor="middle" dominant-baseline="central">1. 폐쇄 OT망</text>
+        <rect x="70" y="90" width="230" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text class="t-box" x="185" y="110" text-anchor="middle" dominant-baseline="central">빗물펌프장 22개소</text>
+        <text class="t-sub" x="185" y="130" text-anchor="middle" dominant-baseline="central">PLC · 내수위/외수위 센서</text>
+        <line x1="300" y1="118" x2="368" y2="118" stroke="#444" stroke-width="0.8" marker-end="url(#arrow)"/>
+        <rect x="370" y="90" width="240" height="56" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+        <text class="t-box" x="490" y="110" text-anchor="middle" dominant-baseline="central">SCADA 서버</text>
+        <text class="t-sub" x="490" y="130" text-anchor="middle" dominant-baseline="central">OPC UA · Modbus 수집</text>
+
+        <!-- Arrow 1 to 2 -->
+        <line x1="340" y1="160" x2="340" y2="208" stroke="#444" stroke-width="0.8" marker-end="url(#arrow)"/>
+        <text class="t-arrow" x="350" y="188">단방향 (읽기 전용)</text>
+
+        <!-- Zone 2: DMZ -->
+        <rect x="40" y="210" width="600" height="100" rx="14" fill="none" stroke="#B4B2A9" stroke-width="0.8" stroke-dasharray="6 4"/>
+        <rect x="56" y="222" width="150" height="22" rx="4" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+        <text class="t-tag-a" x="131" y="236" text-anchor="middle" dominant-baseline="central">2. DMZ · 경계구간</text>
+        <rect x="70" y="255" width="260" height="50" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+        <text class="t-box-a" x="200" y="272" text-anchor="middle" dominant-baseline="central">단방향 게이트웨이</text>
+        <text class="t-sub-a" x="200" y="290" text-anchor="middle" dominant-baseline="central">Data Diode · 읽기만 허용</text>
+        <rect x="350" y="255" width="260" height="50" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+        <text class="t-box-a" x="480" y="272" text-anchor="middle" dominant-baseline="central">수집 에이전트</text>
+        <text class="t-sub-a" x="480" y="290" text-anchor="middle" dominant-baseline="central">30초 주기 · MQTT/HTTPS</text>
+
+        <!-- Arrow 2 to 3 -->
+        <line x1="340" y1="310" x2="340" y2="358" stroke="#444" stroke-width="0.8" marker-end="url(#arrow)"/>
+        <text class="t-arrow" x="350" y="338">TLS 1.3 + 인증서</text>
+
+        <!-- Zone 3: Backend -->
+        <rect x="40" y="360" width="600" height="140" rx="14" fill="none" stroke="#B4B2A9" stroke-width="0.8" stroke-dasharray="6 4"/>
+        <rect x="56" y="372" width="210" height="22" rx="4" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text class="t-tag-t" x="161" y="386" text-anchor="middle" dominant-baseline="central">3. 백엔드 서버 (클라우드)</text>
+        <rect x="60" y="408" width="180" height="78" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text class="t-box-t" x="150" y="430" text-anchor="middle" dominant-baseline="central">FastAPI</text>
+        <text class="t-sub-t" x="150" y="450" text-anchor="middle" dominant-baseline="central">REST · WebSocket</text>
+        <text class="t-sub-t" x="150" y="468" text-anchor="middle" dominant-baseline="central">인증 · API 게이트</text>
+        <rect x="250" y="408" width="180" height="78" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text class="t-box-t" x="340" y="430" text-anchor="middle" dominant-baseline="central">TimescaleDB</text>
+        <text class="t-sub-t" x="340" y="450" text-anchor="middle" dominant-baseline="central">시계열 저장</text>
+        <text class="t-sub-t" x="340" y="468" text-anchor="middle" dominant-baseline="central">22개소 × 30초</text>
+        <rect x="440" y="408" width="180" height="78" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+        <text class="t-box-t" x="530" y="430" text-anchor="middle" dominant-baseline="central">알람 엔진</text>
+        <text class="t-sub-t" x="530" y="450" text-anchor="middle" dominant-baseline="central">4단계 임계값 판정</text>
+        <text class="t-sub-t" x="530" y="468" text-anchor="middle" dominant-baseline="central">FCM · APNs 발송</text>
+
+        <!-- Arrow 3 to 4 -->
+        <line x1="340" y1="500" x2="340" y2="548" stroke="#444" stroke-width="0.8" marker-end="url(#arrow)"/>
+        <text class="t-arrow" x="350" y="528">WSS · Push 알림</text>
+
+        <!-- Zone 4: Mobile -->
+        <rect x="40" y="550" width="600" height="80" rx="14" fill="none" stroke="#B4B2A9" stroke-width="0.8" stroke-dasharray="6 4"/>
+        <rect x="56" y="562" width="120" height="22" rx="4" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+        <text class="t-tag-p" x="116" y="576" text-anchor="middle" dominant-baseline="central">4. 모바일 앱</text>
+        <rect x="70" y="594" width="540" height="30" rx="8" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+        <text class="t-box-p" x="340" y="609" text-anchor="middle" dominant-baseline="central">React Native · iOS / Android · 실시간 수위 + 4단계 경보</text>
+      </svg>
+    </div>
+    <p class="caption">모든 데이터 흐름은 SCADA에서 모바일 방향의 단방향입니다. 외부에서 SCADA로의 제어 명령은 DMZ 단방향 게이트웨이에서 물리적·논리적으로 차단되어야 합니다.</p>
+  </section>
+
+  <section>
+    <div class="list-head">
+      <div>
+        <h2>개발 일정 체크리스트</h2>
+        <div class="section-sub" style="margin-bottom: 0;">6단계 · 총 12~18주 · 우기(6월) 이전 파일럿 안정화 목표</div>
+      </div>
+      <div class="total-status"><strong id="total-done">0</strong> / <span id="total-all">34</span> 완료</div>
+    </div>
+    <div class="progress-bar no-print"><div class="progress-fill" id="overall-fill"></div></div>
+
+    <div class="phases" id="phases">
+
+      <div class="phase" data-phase="1">
+        <div class="phase-head">
+          <div class="phase-title-group">
+            <span class="phase-title">1. 요구사항 정의</span>
+            <span class="tag info">1~2주</span>
+          </div>
+          <span class="phase-count">0/5</span>
+        </div>
+        <label class="item"><input type="checkbox"><span class="item-text">현재 SCADA 프로토콜 조사 (OPC UA / Modbus / DNP3)</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">22개 펌프장 센서 현황 및 태그 구조 파악</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">경보 임계값 4단계 정의 (주의 / 경계 / 심각 / 위험)</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">30초 주기 허용 지연 · 유실 기준 설정</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">사용자 역할 정의 (담당자 / 상황실 / 현장 / 관리자)</span></label>
+      </div>
+
+      <div class="phase" data-phase="2">
+        <div class="phase-head">
+          <div class="phase-title-group">
+            <span class="phase-title">2. 네트워크 · 보안 아키텍처 설계</span>
+            <span class="tag warn">1~2주 · 핵심</span>
+          </div>
+          <span class="phase-count">0/6</span>
+        </div>
+        <label class="item"><input type="checkbox"><span class="item-text">대구시 정보보안 부서 사전 협의 및 보안성 검토 신청</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">단방향 게이트웨이 vs 방화벽 기반 DMZ 방식 결정</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">데이터 흐름 방향 확정 (SCADA pull vs push)</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">TLS 1.3 + 기기 인증서 + API 토큰 체계 설계</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">호스팅 결정 (공공클라우드 G-Cloud / 자체 서버실)</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">아키텍처 다이어그램 문서화 및 검토 승인</span></label>
+      </div>
+
+      <div class="phase" data-phase="3">
+        <div class="phase-head">
+          <div class="phase-title-group">
+            <span class="phase-title">3. 백엔드 개발</span>
+            <span class="tag info">3~4주</span>
+          </div>
+          <span class="phase-count">0/7</span>
+        </div>
+        <label class="item"><input type="checkbox"><span class="item-text">SCADA 데이터 수집기 구현 (OPC UA / Modbus 클라이언트)</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">TimescaleDB 스키마 설계 및 hypertable 구성</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">FastAPI REST 엔드포인트 (현재 / 이력 / 경보 / 메타)</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">WebSocket 실시간 스트리밍 서버</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">알람 엔진 (4단계 판정 · 히스테리시스 · 채터링 방지)</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">FCM (Android) + APNs (iOS) 푸시 연동</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">인증 · 인가 (JWT) 및 관리자 API 분리</span></label>
+      </div>
+
+      <div class="phase" data-phase="4">
+        <div class="phase-head">
+          <div class="phase-title-group">
+            <span class="phase-title">4. 모바일 앱 개발</span>
+            <span class="tag info">3~4주</span>
+          </div>
+          <span class="phase-count">0/6</span>
+        </div>
+        <label class="item"><input type="checkbox"><span class="item-text">메인 화면 · 22개소 지도 + 상태별 색상 표시</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">펌프장 상세 · 실시간 수위 차트 + 24시간 추이</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">경보 화면 · 4단계별 알림음 · 진동 · 풀스크린</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">오프라인 대응 · 마지막 값 캐싱 + 연결 상태 표시</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">당직자 인수인계 · 야간 교대 경보 책임자 지정</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">푸시 토큰 등록 + 배터리 최적화 예외 가이드</span></label>
+      </div>
+
+      <div class="phase" data-phase="5">
+        <div class="phase-head">
+          <div class="phase-title-group">
+            <span class="phase-title">5. 테스트 · 검증</span>
+            <span class="tag warn">2~3주 · 필수</span>
+          </div>
+          <span class="phase-count">0/5</span>
+        </div>
+        <label class="item"><input type="checkbox"><span class="item-text">부하 테스트 · 22개소 동시 수집 + 다수 동접</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">장애 시나리오 · 연결 끊김 · 센서 오류값 튐</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">오경보 (false positive) 검증 및 히스테리시스 튜닝</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">파일럿 펌프장 1~2곳 실제 운영 테스트</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">우기 전 안정화 완료 (6월 이전 목표)</span></label>
+      </div>
+
+      <div class="phase" data-phase="6">
+        <div class="phase-head">
+          <div class="phase-title-group">
+            <span class="phase-title">6. 단계적 배포 · 운영</span>
+            <span class="tag ok">지속</span>
+          </div>
+          <span class="phase-count">0/5</span>
+        </div>
+        <label class="item"><input type="checkbox"><span class="item-text">5개소 확장 배포 (1차 롤아웃)</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">22개소 전체 배포 완료</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">관리자용 운영 대시보드 개설</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">담당자 교육 및 운영 매뉴얼 배포</span></label>
+        <label class="item"><input type="checkbox"><span class="item-text">경보 통계 · 로그 분석 월간 리포트 운영</span></label>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div>대구광역시 · 빗물펌프장 스마트 관리시스템 · 모바일 앱 개발계획</div>
+    <div>진행 상황은 브라우저(<code>localStorage</code>)에 자동 저장됩니다</div>
+  </footer>
+
+</div>
+
+<script>
+(function() {
+  const STORAGE_KEY = 'daegu_pump_app_plan_progress_v1';
+
+  // Assign unique IDs to each checkbox based on its position
+  const items = document.querySelectorAll('.item input[type=checkbox]');
+  items.forEach((cb, i) => {
+    const phase = cb.closest('.phase').dataset.phase;
+    const local = Array.from(cb.closest('.phase').querySelectorAll('input[type=checkbox]')).indexOf(cb);
+    cb.dataset.id = `p${phase}-${local}`;
+  });
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      items.forEach(cb => {
+        if (state[cb.dataset.id]) cb.checked = true;
+      });
+    } catch (e) { console.warn('load failed', e); }
+  }
+
+  function save() {
+    const state = {};
+    items.forEach(cb => { if (cb.checked) state[cb.dataset.id] = true; });
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { console.warn('save failed', e); }
+  }
+
+  function update() {
+    const total = items.length;
+    let done = 0;
+    items.forEach(cb => { if (cb.checked) done++; });
+    document.getElementById('total-done').textContent = done;
+    document.getElementById('total-all').textContent = total;
+    document.getElementById('overall-fill').style.width = (total ? (done/total*100) : 0) + '%';
+
+    document.querySelectorAll('.phase').forEach(phase => {
+      const cbs = phase.querySelectorAll('input[type=checkbox]');
+      const d = phase.querySelectorAll('input[type=checkbox]:checked').length;
+      const countEl = phase.querySelector('.phase-count');
+      if (countEl) countEl.textContent = `${d}/${cbs.length}`;
+      phase.classList.toggle('complete', d === cbs.length && cbs.length > 0);
+    });
+  }
+
+  items.forEach(cb => {
+    cb.addEventListener('change', () => { save(); update(); });
+  });
+
+  window.resetProgress = function() {
+    if (!confirm('모든 체크 항목을 초기화할까요? 저장된 진행 상황이 삭제됩니다.')) return;
+    items.forEach(cb => cb.checked = false);
+    localStorage.removeItem(STORAGE_KEY);
+    update();
+  };
+
+  window.exportJSON = function() {
+    const state = {};
+    items.forEach(cb => {
+      const label = cb.parentElement.querySelector('.item-text').textContent;
+      state[cb.dataset.id] = { checked: cb.checked, text: label };
+    });
+    const data = {
+      exported_at: new Date().toISOString(),
+      total: items.length,
+      done: Array.from(items).filter(cb => cb.checked).length,
+      items: state
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const date = new Date().toISOString().slice(0, 10);
+    a.download = `빗물펌프장_개발진행률_${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  load();
+  update();
+})();
+</script>
+</body>
+</html>
