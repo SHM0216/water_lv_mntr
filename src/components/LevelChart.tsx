@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import Svg, { Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { LevelReading, PumpStation } from '@/types';
-import { colors, levelColors, seriesColors } from '@/theme';
+import { ThemeColors } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 
 type Props = {
   station: PumpStation;
@@ -12,6 +13,8 @@ type Props = {
 const PAD = { l: 40, r: 12, t: 12, b: 26 };
 
 export function LevelChart({ station, series }: Props) {
+  const { colors, levelColors, seriesColors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -103,7 +106,7 @@ export function LevelChart({ station, series }: Props) {
       );
     });
     return out;
-  }, [station, size, yMax]);
+  }, [station, size, yMax, levelColors]);
 
   return (
     <View style={styles.wrap} onLayout={onLayout}>
@@ -136,18 +139,18 @@ export function LevelChart({ station, series }: Props) {
         </Svg>
       )}
       <View style={styles.legend} pointerEvents="none">
-        <LegendDot color={seriesColors.inner} label="내수위(m)" />
-        <LegendDot color={seriesColors.outer} label="외수위(m)" />
+        <LegendDot color={seriesColors.inner} label="내수위(m)" textColor={colors.textDim} />
+        <LegendDot color={seriesColors.outer} label="외수위(m)" textColor={colors.textDim} />
       </View>
     </View>
   );
 }
 
-function LegendDot({ color, label }: { color: string; label: string }) {
+function LegendDot({ color, label, textColor }: { color: string; label: string; textColor: string }) {
   return (
-    <View style={styles.legendItem}>
-      <View style={[styles.legendSwatch, { backgroundColor: color }]} />
-      <Text style={styles.legendText}>{label}</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10 }}>
+      <View style={{ width: 10, height: 3, marginRight: 4, backgroundColor: color }} />
+      <Text style={{ color: textColor, fontSize: 10 }}>{label}</Text>
     </View>
   );
 }
@@ -158,22 +161,20 @@ function formatHour(d: Date): string {
   return `${h}:${m}`;
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    height: 220,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  legend: {
-    position: 'absolute',
-    top: 6,
-    right: 10,
-    flexDirection: 'row',
-  },
-  legendItem: { flexDirection: 'row', alignItems: 'center', marginLeft: 10 },
-  legendSwatch: { width: 10, height: 3, marginRight: 4 },
-  legendText: { color: colors.textDim, fontSize: 10 },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    wrap: {
+      height: 220,
+      borderRadius: 12,
+      overflow: 'hidden',
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    legend: {
+      position: 'absolute',
+      top: 6,
+      right: 10,
+      flexDirection: 'row',
+    },
+  });

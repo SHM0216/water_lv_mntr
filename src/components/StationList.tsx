@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FlatList, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LevelReading } from '@/types';
 import { STATIONS } from '@/data/stations';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, ThemeColors } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 import { StatusBadge } from './StatusBadge';
 
 type Props = {
@@ -11,7 +12,9 @@ type Props = {
 };
 
 export function StationList({ readings, onSelect }: Props) {
-  // Sort: highest level first, then name.
+  const { colors } = useTheme();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const data = [...STATIONS].sort((a, b) => {
     const la = readings[a.id]?.level ?? 0;
     const lb = readings[b.id]?.level ?? 0;
@@ -31,10 +34,7 @@ export function StationList({ readings, onSelect }: Props) {
         return (
           <Pressable
             onPress={() => onSelect(item.id)}
-            style={({ pressed }) => [
-              styles.row,
-              pressed && styles.rowPressed,
-            ]}
+            style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}
             accessibilityLabel={`${item.name} 상세 보기`}
           >
             <View style={{ flex: 1 }}>
@@ -56,23 +56,24 @@ export function StationList({ readings, onSelect }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    backgroundColor: colors.card,
-    marginHorizontal: spacing.lg,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  rowPressed: { backgroundColor: colors.cardHi },
-  name: { color: colors.text, fontSize: 15, fontWeight: '700' },
-  sub: { color: colors.textDim, fontSize: 12, marginTop: 2 },
-  rightCol: { alignItems: 'flex-end', marginRight: spacing.md },
-  level: { color: colors.text, fontSize: 14, fontWeight: '600' },
-  levelSub: { color: colors.textDim, fontSize: 11, marginTop: 2 },
-  sep: { height: spacing.sm },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: spacing.md,
+      backgroundColor: colors.card,
+      marginHorizontal: spacing.lg,
+      borderRadius: radius.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    rowPressed: { backgroundColor: colors.cardHi },
+    name: { color: colors.text, fontSize: 15, fontWeight: '700' },
+    sub: { color: colors.textDim, fontSize: 12, marginTop: 2 },
+    rightCol: { alignItems: 'flex-end', marginRight: spacing.md },
+    level: { color: colors.text, fontSize: 14, fontWeight: '600' },
+    levelSub: { color: colors.textDim, fontSize: 11, marginTop: 2 },
+    sep: { height: spacing.sm },
+  });

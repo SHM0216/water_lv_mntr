@@ -2,8 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { LayoutChangeEvent, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Line, Rect } from 'react-native-svg';
 import { LevelReading, PumpStation } from '@/types';
-import { SEOUL_BOUNDS, STATIONS } from '@/data/stations';
-import { colors, levelColors } from '@/theme';
+import { DAEGU_BOUNDS, STATIONS } from '@/data/stations';
+import { ThemeColors } from '@/theme';
+import { useTheme } from '@/theme/useTheme';
 
 type Props = {
   readings: Record<string, LevelReading>;
@@ -13,6 +14,8 @@ type Props = {
 const PADDING = 16;
 
 export function StationMap({ readings, onSelect }: Props) {
+  const { colors, levelColors, mode } = useTheme();
+  const styles = useMemo(() => makeStyles(colors, mode), [colors, mode]);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const onLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -21,18 +24,17 @@ export function StationMap({ readings, onSelect }: Props) {
 
   const placed = useMemo(() => {
     if (size.w < 40 || size.h < 40) return [];
-    const spanLng = SEOUL_BOUNDS.maxLng - SEOUL_BOUNDS.minLng;
-    const spanLat = SEOUL_BOUNDS.maxLat - SEOUL_BOUNDS.minLat;
+    const spanLng = DAEGU_BOUNDS.maxLng - DAEGU_BOUNDS.minLng;
+    const spanLat = DAEGU_BOUNDS.maxLat - DAEGU_BOUNDS.minLat;
     const innerW = size.w - PADDING * 2;
     const innerH = size.h - PADDING * 2;
     return STATIONS.map((s) => {
-      const x = PADDING + ((s.lng - SEOUL_BOUNDS.minLng) / spanLng) * innerW;
-      const y = PADDING + (1 - (s.lat - SEOUL_BOUNDS.minLat) / spanLat) * innerH;
+      const x = PADDING + ((s.lng - DAEGU_BOUNDS.minLng) / spanLng) * innerW;
+      const y = PADDING + (1 - (s.lat - DAEGU_BOUNDS.minLat) / spanLat) * innerH;
       return { station: s, x, y };
     });
   }, [size]);
 
-  // Faint grid rendered via SVG for a consistent look across native+web.
   const gridLines = useMemo(() => {
     if (size.w < 40 || size.h < 40) return null;
     const lines: React.ReactNode[] = [];
@@ -47,7 +49,7 @@ export function StationMap({ readings, onSelect }: Props) {
       lines.push(<Line key={`hy${j}`} x1={0} y1={y} x2={size.w} y2={y} stroke={colors.border} strokeOpacity={0.35} strokeWidth={0.5} />);
     }
     return lines;
-  }, [size]);
+  }, [size, colors.border]);
 
   return (
     <View style={styles.container} onLayout={onLayout}>
@@ -55,15 +57,25 @@ export function StationMap({ readings, onSelect }: Props) {
         <Svg width={size.w} height={size.h} style={StyleSheet.absoluteFill}>
           <Rect x={0} y={0} width={size.w} height={size.h} fill={colors.bgSoft} />
           {gridLines}
-          {/* Han River schematic: a curved line through mid-latitude */}
+          {/* 금호강 스키매틱 - 북부 동서 방향 */}
           <Line
             x1={0}
-            y1={size.h * 0.42}
+            y1={size.h * 0.22}
             x2={size.w}
-            y2={size.h * 0.48}
+            y2={size.h * 0.18}
             stroke={colors.textDim}
             strokeOpacity={0.35}
             strokeWidth={6}
+          />
+          {/* 신천 스키매틱 - 중앙 남북 방향 */}
+          <Line
+            x1={size.w * 0.46}
+            y1={size.h * 0.2}
+            x2={size.w * 0.5}
+            y2={size.h * 0.78}
+            stroke={colors.textDim}
+            strokeOpacity={0.28}
+            strokeWidth={4}
           />
           {placed.map(({ station, x, y }) => {
             const r = readings[station.id];
@@ -84,7 +96,6 @@ export function StationMap({ readings, onSelect }: Props) {
           })}
         </Svg>
       )}
-      {/* Tap targets layered over SVG for cross-platform hit testing */}
       {placed.map(({ station, x, y }) => (
         <Pressable
           key={station.id}
@@ -125,44 +136,45 @@ function stationShort(s: PumpStation): string {
   return s.name.replace('펌프장', '');
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: colors.bgSoft,
-    position: 'relative',
-    minHeight: 300,
-  },
-  hit: {
-    position: 'absolute',
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  hitLabel: {
-    color: colors.text,
-    fontSize: 9,
-    marginTop: 18,
-    textShadowColor: 'rgba(255,255,255,0.9)',
-    textShadowRadius: 2,
-    fontWeight: '600',
-  },
-  legend: {
-    position: 'absolute',
-    left: 12,
-    bottom: 12,
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  legendItem: { flexDirection: 'row', alignItems: 'center', marginRight: 10 },
-  legendDot: { width: 8, height: 8, borderRadius: 4, marginRight: 4 },
-  legendText: { color: colors.text, fontSize: 11 },
-});
+const makeStyles = (colors: ThemeColors, mode: 'light' | 'dark') =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      borderRadius: 12,
+      overflow: 'hidden',
+      backgroundColor: colors.bgSoft,
+      position: 'relative',
+      minHeight: 300,
+    },
+    hit: {
+      position: 'absolute',
+      width: 36,
+      height: 36,
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    hitLabel: {
+      color: colors.text,
+      fontSize: 9,
+      marginTop: 18,
+      textShadowColor: mode === 'dark' ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.9)',
+      textShadowRadius: 2,
+      fontWeight: '600',
+    },
+    legend: {
+      position: 'absolute',
+      left: 12,
+      bottom: 12,
+      flexDirection: 'row',
+      backgroundColor: colors.overlay,
+      paddingHorizontal: 8,
+      paddingVertical: 6,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    legendItem: { flexDirection: 'row', alignItems: 'center', marginRight: 10 },
+    legendDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
+    legendText: { color: colors.text, fontSize: 11 },
+  });
