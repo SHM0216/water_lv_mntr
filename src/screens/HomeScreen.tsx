@@ -6,7 +6,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { STATIONS } from '@/data/stations';
 import { radius, spacing, ThemeColors } from '@/theme';
 import { useTheme, useThemeMode } from '@/theme/useTheme';
-import { StationMap } from '@/components/StationMap';
+import { OSMStationMap } from '@/components/OSMStationMap';
 import { StationList } from '@/components/StationList';
 import { ConnectionBanner } from '@/components/ConnectionBanner';
 
@@ -87,7 +87,7 @@ export function HomeScreen({ navigation }: Props) {
 
       <View style={[styles.body, wide && styles.bodyWide]}>
         <View style={[styles.panel, wide ? { flex: 1.2 } : { flex: 1, display: view === 'map' ? 'flex' : 'none' }]}>
-          <StationMap
+          <OSMStationMap
             readings={readings}
             onSelect={(id) => navigation.navigate('Detail', { stationId: id })}
           />
