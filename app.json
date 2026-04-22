@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "빗물펌프장 수위 모니터",
+    "name": "대구 빗물펌프장 수위 모니터",
     "slug": "water-lv-mntr",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,13 +9,13 @@
     "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "kr.go.seoul.waterlvmntr",
+      "bundleIdentifier": "kr.go.daegu.waterlvmntr",
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification", "audio"]
       }
     },
     "android": {
-      "package": "kr.go.seoul.waterlvmntr",
+      "package": "kr.go.daegu.waterlvmntr",
       "permissions": [
         "VIBRATE",
         "WAKE_LOCK",
