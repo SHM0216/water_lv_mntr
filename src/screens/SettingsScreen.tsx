@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -14,7 +14,8 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/types';
 import { useAppStore } from '@/store/useAppStore';
-import { colors, radius, spacing } from '@/theme';
+import { radius, spacing, ThemeColors, ThemeMode } from '@/theme';
+import { useTheme, useThemeMode } from '@/theme/useTheme';
 import { registerForPush } from '@/services/notifications';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
@@ -28,6 +29,10 @@ function notify(title: string, message: string): void {
 }
 
 export function SettingsScreen({ navigation }: Props) {
+  const { colors } = useTheme();
+  const { mode, resolved, setMode } = useThemeMode();
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   const pushToken = useAppStore((s) => s.pushToken);
   const setPushToken = useAppStore((s) => s.setPushToken);
   const batteryGuideAck = useAppStore((s) => s.batteryGuideAck);
@@ -74,7 +79,31 @@ export function SettingsScreen({ navigation }: Props) {
         <Text style={styles.title}>설정</Text>
       </View>
 
-      <Section title="사용자">
+      <Section styles={styles} title="화면 테마">
+        <Text style={styles.desc}>
+          앱 배경 색상을 선택합니다. ‘시스템’ 은 OS 의 다크모드 설정을 따라갑니다.
+          현재 적용: {resolved === 'dark' ? '다크' : '라이트'}
+        </Text>
+        <View style={styles.segRow}>
+          {(
+            [
+              ['light', '라이트'],
+              ['dark', '다크'],
+              ['system', '시스템'],
+            ] as const
+          ).map(([val, label]) => (
+            <Pressable
+              key={val}
+              onPress={() => setMode(val as ThemeMode)}
+              style={[styles.segBtn, mode === val && styles.segBtnActive]}
+            >
+              <Text style={[styles.segText, mode === val && styles.segTextActive]}>{label}</Text>
+            </Pressable>
+          ))}
+        </View>
+      </Section>
+
+      <Section styles={styles} title="사용자">
         <Text style={styles.fieldLabel}>표시 이름 (경보 확인자)</Text>
         <View style={{ flexDirection: 'row', gap: spacing.sm as any }}>
           <TextInput
@@ -93,7 +122,7 @@ export function SettingsScreen({ navigation }: Props) {
         </View>
       </Section>
 
-      <Section title="푸시 알림">
+      <Section styles={styles} title="푸시 알림">
         <Text style={styles.desc}>
           FCM / APNs 푸시 토큰을 발급받아 백엔드 알람 엔진으로 등록합니다. 경보 4단계(관심·주의·경계·심각)에 따라 서로 다른 채널·소리·진동이 적용됩니다.
         </Text>
@@ -108,16 +137,16 @@ export function SettingsScreen({ navigation }: Props) {
         </Pressable>
       </Section>
 
-      <Section title="배터리 최적화 예외 가이드">
+      <Section styles={styles} title="배터리 최적화 예외 가이드">
         <Text style={styles.desc}>
           Android 제조사의 배터리 최적화가 켜져 있으면 야간 경보 푸시가 지연/차단될 수 있습니다. 아래 단계를 따라 본 앱을 예외(허용) 목록에 추가해 주세요.
         </Text>
         <View style={styles.steps}>
-          <Step n={1} text="설정 → 앱 → 빗물펌프장 수위 모니터 → 배터리" />
-          <Step n={2} text="‘제한 없음’ 또는 ‘배터리 최적화 안 함’ 선택" />
-          <Step n={3} text="삼성: 설정 → 배터리 → 백그라운드 사용 제한 → 본 앱 제외" />
-          <Step n={4} text="샤오미/화웨이: 자동 실행 허용 + 잠금 후에도 알림 표시 ON" />
-          <Step n={5} text="iOS: 설정 → 알림 → 본 앱 → 중요 경고/시간 민감 알림 허용" />
+          <Step styles={styles} n={1} text="설정 → 앱 → 대구 빗물펌프장 수위 모니터 → 배터리" />
+          <Step styles={styles} n={2} text="‘제한 없음’ 또는 ‘배터리 최적화 안 함’ 선택" />
+          <Step styles={styles} n={3} text="삼성: 설정 → 배터리 → 백그라운드 사용 제한 → 본 앱 제외" />
+          <Step styles={styles} n={4} text="샤오미/화웨이: 자동 실행 허용 + 잠금 후에도 알림 표시 ON" />
+          <Step styles={styles} n={5} text="iOS: 설정 → 알림 → 본 앱 → 중요 경고/시간 민감 알림 허용" />
         </View>
         {Platform.OS !== 'web' && (
           <Pressable onPress={openBatterySettings} style={styles.secondaryBtn}>
@@ -130,7 +159,7 @@ export function SettingsScreen({ navigation }: Props) {
         </View>
       </Section>
 
-      <Section title="개발자 도구">
+      <Section styles={styles} title="개발자 도구">
         <View style={styles.switchRow}>
           <Text style={styles.switchLabel}>네트워크 온라인 (테스트용 토글)</Text>
           <Switch value={online} onValueChange={setOnline} />
@@ -143,7 +172,7 @@ export function SettingsScreen({ navigation }: Props) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ styles, title, children }: { styles: any; title: string; children: React.ReactNode }) {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -152,7 +181,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Step({ n, text }: { n: number; text: string }) {
+function Step({ styles, n, text }: { styles: any; n: number; text: string }) {
   return (
     <View style={styles.stepRow}>
       <View style={styles.stepNum}>
@@ -163,100 +192,116 @@ function Step({ n, text }: { n: number; text: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    gap: spacing.md as any,
-  },
-  backBtn: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: radius.sm,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  backText: { color: colors.text },
-  title: { color: colors.text, fontSize: 20, fontWeight: '800' },
-  section: {
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.lg,
-  },
-  sectionTitle: { color: colors.text, fontSize: 14, fontWeight: '700', marginBottom: spacing.sm },
-  sectionBody: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.lg,
-  },
-  desc: { color: colors.textDim, fontSize: 13, lineHeight: 19, marginBottom: spacing.md },
-  fieldLabel: { color: colors.textDim, fontSize: 12, marginBottom: 4 },
-  input: {
-    flex: 1,
-    backgroundColor: colors.bgSoft,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    color: colors.text,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-  },
-  tokenBox: {
-    backgroundColor: colors.bgSoft,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
-  tokenLabel: { color: colors.textDim, fontSize: 11, marginBottom: 4 },
-  tokenValue: { color: colors.text, fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }), fontSize: 12 },
-  primaryBtn: {
-    backgroundColor: colors.accent,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: 10,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  primaryBtnText: { color: '#FFFFFF', fontWeight: '800' },
-  secondaryBtn: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: 10,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
-  },
-  secondaryBtnText: { color: colors.text, fontWeight: '600' },
-  steps: { gap: spacing.sm as any },
-  stepRow: { flexDirection: 'row', alignItems: 'flex-start' },
-  stepNum: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: colors.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.sm,
-    marginTop: 1,
-  },
-  stepNumText: { color: colors.text, fontSize: 12, fontWeight: '700' },
-  stepText: { flex: 1, color: colors.text, fontSize: 13, lineHeight: 19 },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: spacing.md,
-  },
-  switchLabel: { color: colors.text, fontSize: 13 },
-});
+const makeStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: colors.bg },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.lg,
+      gap: spacing.md as any,
+    },
+    backBtn: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: 6,
+      borderRadius: radius.sm,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    backText: { color: colors.text },
+    title: { color: colors.text, fontSize: 20, fontWeight: '800' },
+    section: { marginHorizontal: spacing.lg, marginTop: spacing.lg },
+    sectionTitle: { color: colors.text, fontSize: 14, fontWeight: '700', marginBottom: spacing.sm },
+    sectionBody: {
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radius.md,
+      padding: spacing.lg,
+    },
+    desc: { color: colors.textDim, fontSize: 13, lineHeight: 19, marginBottom: spacing.md },
+    fieldLabel: { color: colors.textDim, fontSize: 12, marginBottom: 4 },
+    input: {
+      flex: 1,
+      backgroundColor: colors.inputBg,
+      borderRadius: radius.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+      color: colors.text,
+      paddingHorizontal: spacing.md,
+      paddingVertical: 10,
+    },
+    tokenBox: {
+      backgroundColor: colors.inputBg,
+      borderRadius: radius.sm,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+    },
+    tokenLabel: { color: colors.textDim, fontSize: 11, marginBottom: 4 },
+    tokenValue: {
+      color: colors.text,
+      fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
+      fontSize: 12,
+    },
+    primaryBtn: {
+      backgroundColor: colors.accent,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: 10,
+      borderRadius: radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    primaryBtnText: { color: colors.onAccent, fontWeight: '800' },
+    secondaryBtn: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: 10,
+      borderRadius: radius.sm,
+      alignItems: 'center',
+      marginTop: spacing.sm,
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    secondaryBtnText: { color: colors.text, fontWeight: '600' },
+    steps: { gap: spacing.sm as any },
+    stepRow: { flexDirection: 'row', alignItems: 'flex-start' },
+    stepNum: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: colors.accentSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: spacing.sm,
+      marginTop: 1,
+    },
+    stepNumText: { color: colors.text, fontSize: 12, fontWeight: '700' },
+    stepText: { flex: 1, color: colors.text, fontSize: 13, lineHeight: 19 },
+    switchRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginTop: spacing.md,
+    },
+    switchLabel: { color: colors.text, fontSize: 13 },
+    segRow: { flexDirection: 'row', gap: spacing.xs as any },
+    segBtn: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: 'center',
+      borderRadius: radius.sm,
+      backgroundColor: colors.inputBg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      ...Platform.select({ web: { cursor: 'pointer' as any }, default: {} }),
+    },
+    segBtnActive: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
+    segText: { color: colors.textDim, fontWeight: '600' },
+    segTextActive: { color: colors.text },
+  });
